@@ -26,6 +26,8 @@ public class UserMealsUtil {
         mealsTo.forEach(System.out::println);
 
         System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
+
+        System.out.println(filteredByCyclesOptional(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -57,6 +59,42 @@ public class UserMealsUtil {
                     return createUserMealWithExcess(e, excess);
                 })
                 .collect(Collectors.toList());
+    }
+
+    public static List<UserMealWithExcess> filteredByCyclesOptional(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        List<UserMealWithExcess> listUserMealWithExcesses = new ArrayList<>();
+        Map<LocalDate, Integer> caloriesByDays = new HashMap<>();
+        Map<LocalDate, List<UserMealWithExcess>> filteredNotExcessUserMeal = new HashMap<>();
+
+        for (UserMeal meal : meals) {
+            LocalDate currentDate = getDate(meal);
+            int caloriesBeforeCurrentMeal = caloriesByDays.getOrDefault(currentDate, meal.getCalories());
+
+            int totalCaloriesAfterCurrentMeal = caloriesByDays.merge(currentDate, meal.getCalories(), Integer::sum);
+            boolean excess = isExcess(totalCaloriesAfterCurrentMeal, caloriesPerDay);
+
+            if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
+                UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
+                listUserMealWithExcesses.add(userMealWithExcess);
+
+                if (!excess) {
+                    filteredNotExcessUserMeal.merge(
+                            currentDate,
+                            Collections.singletonList(userMealWithExcess),
+                            (l, r) -> {
+                                l.addAll(r);
+                                return l;
+                            });
+                }
+            } else if (excess && (!isExcess(caloriesBeforeCurrentMeal, caloriesPerDay))) {
+                for (UserMealWithExcess filteredMeal : filteredNotExcessUserMeal.get(currentDate)) {
+                    filteredMeal.setExcess(true);
+                }
+                filteredNotExcessUserMeal.remove(currentDate);
+            }
+        }
+
+        return listUserMealWithExcesses;
     }
 
 
