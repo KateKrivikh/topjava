@@ -53,10 +53,10 @@ public class UserMealsUtil {
                 .collect(Collectors.groupingBy(UserMealsUtil::getDate, Collectors.summingInt(UserMeal::getCalories)));
 
         return meals.stream()
-                .filter(e -> TimeUtil.isBetweenHalfOpen(getTime(e), startTime, endTime))
-                .map(e -> {
-                    boolean excess = isExcess(caloriesByDays.get(getDate(e)), caloriesPerDay);
-                    return createUserMealWithExcess(e, excess);
+                .filter(m -> TimeUtil.isBetweenHalfOpen(getTime(m), startTime, endTime))
+                .map(m -> {
+                    boolean excess = isExcess(caloriesByDays.get(getDate(m)), caloriesPerDay);
+                    return createUserMealWithExcess(m, excess);
                 })
                 .collect(Collectors.toList());
     }
