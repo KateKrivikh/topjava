@@ -1,6 +1,8 @@
 package ru.javawebinar.topjava.util;
 
+import ru.javawebinar.topjava.exception.MealForAnotherDayException;
 import ru.javawebinar.topjava.model.UserMeal;
+import ru.javawebinar.topjava.model.UserMealAllDay;
 import ru.javawebinar.topjava.model.UserMealWithExcess;
 
 import java.time.LocalDate;
@@ -8,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class UserMealsUtil {
@@ -27,7 +30,7 @@ public class UserMealsUtil {
 
         System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
 
-        System.out.println(filteredByCyclesOptional(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
+        System.out.println(filteredByCollector(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -61,43 +64,54 @@ public class UserMealsUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<UserMealWithExcess> filteredByCyclesOptional(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        List<UserMealWithExcess> listUserMealWithExcesses = new ArrayList<>();
-        Map<LocalDate, Integer> caloriesByDays = new HashMap<>();
-        Map<LocalDate, List<UserMealWithExcess>> filteredNotExcessUserMeal = new HashMap<>();
+    public static List<UserMealWithExcess> filteredByCollector(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        // TODO Such spagetti-code is relevant? How can I refactor this better?
+        Collector<UserMeal, Map<LocalDate, UserMealAllDay>, List<UserMealWithExcess>> collector = Collector.of(
+                HashMap::new,
+                (map, userMeal) -> {
+                    LocalDate localDate = getDate(userMeal);
 
-        for (UserMeal meal : meals) {
-            LocalDate currentDate = getDate(meal);
-            int caloriesBeforeCurrentMeal = caloriesByDays.getOrDefault(currentDate, meal.getCalories());
+                    UserMealAllDay userMealAllDay = map.getOrDefault(localDate, new UserMealAllDay(localDate));
+                    userMealAllDay.addMeal(userMeal);
 
-            int totalCaloriesAfterCurrentMeal = caloriesByDays.merge(currentDate, meal.getCalories(), Integer::sum);
-            boolean excess = isExcess(totalCaloriesAfterCurrentMeal, caloriesPerDay);
+                    map.put(localDate, userMealAllDay);
+                },
+                (l, r) -> {
+                    r.forEach((k, v) -> {
+                        if (l.containsKey(k)) {
+                            UserMealAllDay userMealAllDay = l.get(k);
+                            for (UserMeal meal : v.getMeals()) {
+                                userMealAllDay.addMeal(meal);
+                            }
+                        } else
+                            l.put(k, v);
+                    });
+                    return l;
+                },
+                (map) -> {
+                    List<UserMealWithExcess> resultList = new ArrayList<>();
+                    for (UserMealAllDay userMealAllDay : map.values()) {
+                        boolean excess = isExcess(userMealAllDay.getCalories(), caloriesPerDay);
+                        for (UserMeal meal : userMealAllDay.getMeals()) {
+                            if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
+                                UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
+                                resultList.add(userMealWithExcess);
+                            }
+                        }
+                    }
+                    return resultList;
+                });
 
-            if (excess && (!isExcess(caloriesBeforeCurrentMeal, caloriesPerDay))) {
-                filteredNotExcessUserMeal.get(currentDate).forEach(m -> m.setExcess(true));
-                filteredNotExcessUserMeal.remove(currentDate);
-            }
 
-            if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
-                UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
-                listUserMealWithExcesses.add(userMealWithExcess);
-
-                if (!excess) {
-                    List<UserMealWithExcess> list = new ArrayList<>();
-                    list.add(userMealWithExcess);
-                    filteredNotExcessUserMeal.merge(
-                            currentDate,
-                            list,
-                            (l, r) -> {
-                                l.addAll(r);
-                                return l;
-                            });
-                }
-            }
+        try {
+            return meals.parallelStream().collect(collector);
+        } catch (MealForAnotherDayException e) {
+            // TODO Don't know how to do without exception.
+            // TODO Do not logging because of (10) case in comments for HW0
+            return new ArrayList<>();
         }
-
-        return listUserMealWithExcesses;
     }
+
 
 
     private static LocalDate getDate(UserMeal meal) {
