@@ -73,24 +73,26 @@ public class UserMealsUtil {
             int totalCaloriesAfterCurrentMeal = caloriesByDays.merge(currentDate, meal.getCalories(), Integer::sum);
             boolean excess = isExcess(totalCaloriesAfterCurrentMeal, caloriesPerDay);
 
+            if (excess && (!isExcess(caloriesBeforeCurrentMeal, caloriesPerDay))) {
+                filteredNotExcessUserMeal.get(currentDate).forEach(m -> m.setExcess(true));
+                filteredNotExcessUserMeal.remove(currentDate);
+            }
+
             if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
                 UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
                 listUserMealWithExcesses.add(userMealWithExcess);
 
                 if (!excess) {
+                    List<UserMealWithExcess> list = new ArrayList<>();
+                    list.add(userMealWithExcess);
                     filteredNotExcessUserMeal.merge(
                             currentDate,
-                            Collections.singletonList(userMealWithExcess),
+                            list,
                             (l, r) -> {
                                 l.addAll(r);
                                 return l;
                             });
                 }
-            } else if (excess && (!isExcess(caloriesBeforeCurrentMeal, caloriesPerDay))) {
-                for (UserMealWithExcess filteredMeal : filteredNotExcessUserMeal.get(currentDate)) {
-                    filteredMeal.setExcess(true);
-                }
-                filteredNotExcessUserMeal.remove(currentDate);
             }
         }
 
