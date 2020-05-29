@@ -87,19 +87,13 @@ public class UserMealsUtil {
                     });
                     return mapMealResult;
                 },
-                (map) -> {
-                    List<UserMealWithExcess> resultList = new ArrayList<>();
-                    for (UserMealAllDay userMealAllDay : map.values()) {
-                        boolean excess = isExcess(userMealAllDay.getCalories(), caloriesPerDay);
-                        for (UserMeal meal : userMealAllDay.getMeals()) {
-                            if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
-                                UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
-                                resultList.add(userMealWithExcess);
-                            }
-                        }
-                    }
-                    return resultList;
-                });
+                (map) -> map.values().stream()
+                        .flatMap(mealAllDay -> {
+                            boolean excess = isExcess(mealAllDay.getCalories(), caloriesPerDay);
+                            return mealAllDay.getMeals().stream()
+                                    .filter(meal -> TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime))
+                                    .map(meal -> createUserMealWithExcess(meal, excess));
+                        }).collect(Collectors.toList()));
 
 
         return meals.parallelStream().collect(collector);
