@@ -75,17 +75,17 @@ public class UserMealsUtil {
 
                     map.put(localDate, userMealAllDay);
                 },
-                (l, r) -> {
-                    r.forEach((k, v) -> {
-                        if (l.containsKey(k)) {
-                            UserMealAllDay userMealAllDay = l.get(k);
-                            for (UserMeal meal : v.getMeals()) {
+                (mapMealResult, mapMealCombining) -> {
+                    mapMealCombining.forEach((date, mealAllDay) -> {
+                        if (mapMealResult.containsKey(date)) {
+                            UserMealAllDay userMealAllDay = mapMealResult.get(date);
+                            for (UserMeal meal : mealAllDay.getMeals()) {
                                 userMealAllDay.addMeal(meal);
                             }
                         } else
-                            l.put(k, v);
+                            mapMealResult.put(date, mealAllDay);
                     });
-                    return l;
+                    return mapMealResult;
                 },
                 (map) -> {
                     List<UserMealWithExcess> resultList = new ArrayList<>();
