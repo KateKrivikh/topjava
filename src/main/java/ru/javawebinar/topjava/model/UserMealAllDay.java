@@ -1,7 +1,5 @@
 package ru.javawebinar.topjava.model;
 
-import ru.javawebinar.topjava.exception.MealForAnotherDayException;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +16,6 @@ public class UserMealAllDay {
     }
 
     public void addMeal(UserMeal meal) {
-        if (!meal.getDateTime().toLocalDate().equals(date))
-            throw new MealForAnotherDayException();
-
         meals.add(meal);
         calories += meal.getCalories();
     }

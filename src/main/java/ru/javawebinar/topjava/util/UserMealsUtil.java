@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.util;
 
-import ru.javawebinar.topjava.exception.MealForAnotherDayException;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealAllDay;
 import ru.javawebinar.topjava.model.UserMealWithExcess;
@@ -103,15 +102,8 @@ public class UserMealsUtil {
                 });
 
 
-        try {
-            return meals.parallelStream().collect(collector);
-        } catch (MealForAnotherDayException e) {
-            // TODO Don't know how to do without exception.
-            // TODO Do not logging because of (10) case in comments for HW0
-            return new ArrayList<>();
-        }
+        return meals.parallelStream().collect(collector);
     }
-
 
 
     private static LocalDate getDate(UserMeal meal) {
