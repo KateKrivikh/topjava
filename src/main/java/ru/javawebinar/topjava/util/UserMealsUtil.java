@@ -1,7 +1,6 @@
 package ru.javawebinar.topjava.util;
 
 import ru.javawebinar.topjava.model.UserMeal;
-import ru.javawebinar.topjava.model.UserMealAllDay;
 import ru.javawebinar.topjava.model.UserMealWithExcess;
 
 import java.time.LocalDate;
@@ -64,39 +63,42 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExcess> filteredByCollector(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        // TODO Such spagetti-code is relevant? How can I refactor this better?
-        Collector<UserMeal, Map<LocalDate, UserMealAllDay>, List<UserMealWithExcess>> collector = Collector.of(
-                HashMap::new,
-                (map, userMeal) -> {
-                    LocalDate localDate = getDate(userMeal);
+        class MealGroup {
+            int calories = 0;
+            final List<UserMeal> meals = new ArrayList<>();
 
-                    UserMealAllDay userMealAllDay = map.getOrDefault(localDate, new UserMealAllDay(localDate));
-                    userMealAllDay.addMeal(userMeal);
+            void addMeal(UserMeal meal) {
+                meals.add(meal);
+                calories += meal.getCalories();
+            }
 
-                    map.put(localDate, userMealAllDay);
-                },
-                (mapMealResult, mapMealCombining) -> {
-                    mapMealCombining.forEach((date, mealAllDay) -> {
-                        if (mapMealResult.containsKey(date)) {
-                            UserMealAllDay userMealAllDay = mapMealResult.get(date);
-                            for (UserMeal meal : mealAllDay.getMeals()) {
-                                userMealAllDay.addMeal(meal);
-                            }
-                        } else
-                            mapMealResult.put(date, mealAllDay);
-                    });
-                    return mapMealResult;
-                },
-                (map) -> map.values().stream()
-                        .flatMap(mealAllDay -> {
-                            boolean excess = isExcess(mealAllDay.getCalories(), caloriesPerDay);
-                            return mealAllDay.getMeals().stream()
-                                    .filter(meal -> TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime))
-                                    .map(meal -> createUserMealWithExcess(meal, excess));
-                        }).collect(Collectors.toList()));
+            int getCalories() {
+                return calories;
+            }
+
+            List<UserMeal> getMeals() {
+                return meals;
+            }
+        }
 
 
-        return meals.parallelStream().collect(collector);
+        Collector<UserMeal, MealGroup, MealGroup> collectorToMealGroup = Collector.of(
+                MealGroup::new,
+                MealGroup::addMeal,
+                (left, right) -> {
+                    right.getMeals().forEach(left::addMeal);
+                    return left;
+                }
+        );
+
+        return meals.stream().collect(Collectors.groupingBy(UserMealsUtil::getDate, collectorToMealGroup))
+                .values().stream()
+                .flatMap(mealPerDay -> {
+                    boolean excess = isExcess(mealPerDay.getCalories(), caloriesPerDay);
+                    return mealPerDay.getMeals().stream()
+                            .filter(meal -> TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime))
+                            .map(meal -> createUserMealWithExcess(meal, excess));
+                }).collect(Collectors.toList());
     }
 
 
