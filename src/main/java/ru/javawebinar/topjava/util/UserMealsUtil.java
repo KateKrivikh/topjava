@@ -40,7 +40,7 @@ public class UserMealsUtil {
         List<UserMealWithExcess> listUserMealWithExcesses = new ArrayList<>();
         for (UserMeal meal : meals) {
             if (TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime)) {
-                boolean excess = isExcess(caloriesByDays.get(getDate(meal)), caloriesPerDay);
+                boolean excess = caloriesByDays.get(getDate(meal)) > caloriesPerDay;
                 UserMealWithExcess userMealWithExcess = createUserMealWithExcess(meal, excess);
                 listUserMealWithExcesses.add(userMealWithExcess);
             }
@@ -56,7 +56,7 @@ public class UserMealsUtil {
         return meals.stream()
                 .filter(m -> TimeUtil.isBetweenHalfOpen(getTime(m), startTime, endTime))
                 .map(m -> {
-                    boolean excess = isExcess(caloriesByDays.get(getDate(m)), caloriesPerDay);
+                    boolean excess = caloriesByDays.get(getDate(m)) > caloriesPerDay;
                     return createUserMealWithExcess(m, excess);
                 })
                 .collect(Collectors.toList());
@@ -71,31 +71,23 @@ public class UserMealsUtil {
                 meals.add(meal);
                 calories += meal.getCalories();
             }
-
-            int getCalories() {
-                return calories;
-            }
-
-            List<UserMeal> getMeals() {
-                return meals;
-            }
         }
-
 
         Collector<UserMeal, MealGroup, MealGroup> collectorToMealGroup = Collector.of(
                 MealGroup::new,
                 MealGroup::addMeal,
                 (left, right) -> {
-                    right.getMeals().forEach(left::addMeal);
+                    left.meals.addAll(right.meals);
+                    left.calories += right.calories;
                     return left;
                 }
         );
 
-        return meals.stream().collect(Collectors.groupingBy(UserMealsUtil::getDate, collectorToMealGroup))
+        return meals.parallelStream().collect(Collectors.groupingBy(UserMealsUtil::getDate, collectorToMealGroup))
                 .values().stream()
                 .flatMap(mealPerDay -> {
-                    boolean excess = isExcess(mealPerDay.getCalories(), caloriesPerDay);
-                    return mealPerDay.getMeals().stream()
+                    boolean excess = mealPerDay.calories > caloriesPerDay;
+                    return mealPerDay.meals.stream()
                             .filter(meal -> TimeUtil.isBetweenHalfOpen(getTime(meal), startTime, endTime))
                             .map(meal -> createUserMealWithExcess(meal, excess));
                 }).collect(Collectors.toList());
@@ -108,10 +100,6 @@ public class UserMealsUtil {
 
     private static LocalTime getTime(UserMeal meal) {
         return meal.getDateTime().toLocalTime();
-    }
-
-    private static boolean isExcess(int caloriesPerCurrentDay, int limitedCaloriesPerDay) {
-        return caloriesPerCurrentDay > limitedCaloriesPerDay;
     }
 
     private static UserMealWithExcess createUserMealWithExcess(UserMeal meal, boolean excess) {
