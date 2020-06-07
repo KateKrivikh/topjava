@@ -16,11 +16,7 @@
 <h2>${meal.id == null ? 'Добавляем новую еду' : 'Редактируем еду'}</h2>
 
 <form method="POST" action='meals'>
-    <label id="Id">Ид</label>
-    <input
-            type="text" name="id" width="20" readonly="readonly" style="background-color: lightgray"
-            value="<c:out value="${meal.id}" />"/>
-    <br/>
+    <input type="hidden" name="id" value="${meal.id}">
     <label id="DateTime">Дата/время</label>
     <input
             type="datetime-local" name="dateTime" width="20"
@@ -28,11 +24,11 @@
     <label id="Description">Описание</label>
     <input
             type="text" name="description" required="required" width="20"
-            value="<c:out value="${meal.description}" />"/> <br/>
+            value="${meal.description}"/> <br/>
     <label id="Calories">Калории</label>
     <input
             type="number" name="calories" required="required" min="1" width="20"
-            value="<c:out value="${meal.calories}" />"/> <br/>
+            value="${meal.calories}"/> <br/>
     <input
             type="submit" value="Сохранить"/>
 </form>

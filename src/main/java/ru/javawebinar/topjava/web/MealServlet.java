@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -26,8 +25,9 @@ public class MealServlet extends HttpServlet {
     public static final String JSP_MEAL_LIST = "/meals.jsp";
     public static final String JSP_MEAL = "/meal.jsp";
     public static final String REDIRECT_MEAL_LIST = "meals";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
-    public static final int CALORIES_PER_DAY_FOR_EXCESS = 2000;
+    private static final int CALORIES_PER_DAY_FOR_EXCESS = 2000;
 
     private static final Logger log = getLogger(MealServlet.class);
 
@@ -62,6 +62,7 @@ public class MealServlet extends HttpServlet {
 
                 List<MealTo> mealsTo = MealsUtil.filteredByStreams(meals, LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY_FOR_EXCESS);
                 request.setAttribute("mealsTo", mealsTo);
+                request.setAttribute("dateFormatter", DATE_FORMATTER);
 
                 log.debug("Forward to meal list");
                 getServletContext().getRequestDispatcher(JSP_MEAL_LIST).forward(request, response);
@@ -81,15 +82,7 @@ public class MealServlet extends HttpServlet {
 
         long id = (idString != null && !idString.isEmpty()) ? Long.parseLong(idString) : 0L;
         int calories = Integer.parseInt(caloriesString);
-        dateTimeString = dateTimeString.replace("T", " ");
-        LocalDateTime dateTime;
-        try {
-            dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        } catch (DateTimeParseException e) {
-            log.error("Incorrect date format while meal post: {}", dateTimeString);
-            e.printStackTrace();
-            return;
-        }
+        LocalDateTime dateTime = LocalDateTime.parse(dateTimeString);
 
         Meal meal = new Meal(id, dateTime, description, calories);
         mealRepository.save(meal);

@@ -10,7 +10,7 @@ public interface MealRepository {
 
     Meal getById(long id);
 
-    void save(Meal meal);
+    Meal save(Meal meal);
 
     void delete(long id);
 }

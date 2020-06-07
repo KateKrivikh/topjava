@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.time.format.DateTimeFormatter" %>
 <html lang="ru">
 <head>
     <title>Meals</title>
@@ -10,8 +9,7 @@
 <hr>
 <h2>Моя еда</h2>
 
-<c:set var="pattern" value="YYYY.MM.dd HH:mm:ss"/>
-<c:set var="formatter" value="${DateTimeFormatter.ofPattern(pattern)}"/>
+<c:set var="dateFormatter" value="${requestScope.dateFormatter}"/>
 
 <table style="border: solid; width: 60%">
     <tr style="text-align: left">
@@ -22,11 +20,11 @@
 
     <c:forEach var="mealTo" items="${requestScope.mealsTo}">
         <tr style="color: ${mealTo.excess ? 'red' : 'green'}">
-            <td><c:out value="${mealTo.dateTime.format(formatter)}"/></td>
-            <td><c:out value="${mealTo.description}"/></td>
-            <td><c:out value="${mealTo.calories}"/></td>
-            <td><a href="meals?action=edit&id=<c:out value="${mealTo.id}"/>">Изменить</a></td>
-            <td><a href="meals?action=delete&id=<c:out value="${mealTo.id}"/>">Удалить</a></td>
+            <td>${mealTo.dateTime.format(dateFormatter)}</td>
+            <td>${mealTo.description}</td>
+            <td>${mealTo.calories}</td>
+            <td><a href="meals?action=edit&id=${mealTo.id}">Изменить</a></td>
+            <td><a href="meals?action=delete&id=${mealTo.id}">Удалить</a></td>
         </tr>
     </c:forEach>
 

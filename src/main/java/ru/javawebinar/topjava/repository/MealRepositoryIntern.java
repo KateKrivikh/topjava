@@ -2,8 +2,9 @@ package ru.javawebinar.topjava.repository;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.MealsUtil;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,7 @@ public class MealRepositoryIntern implements MealRepository {
     private static final Logger log = getLogger(MealRepositoryIntern.class);
 
     static {
-        // TODO Don't understand where should be done
-        MealsUtil.initTestMeals();
+        initTestMeals();
     }
 
     private MealRepositoryIntern() {
@@ -45,7 +45,7 @@ public class MealRepositoryIntern implements MealRepository {
     }
 
     @Override
-    public void save(Meal meal) {
+    public Meal save(Meal meal) {
         long id = meal.getId();
         if (id == 0) {
             id = counter.incrementAndGet();
@@ -53,12 +53,25 @@ public class MealRepositoryIntern implements MealRepository {
         }
         log.debug("Save: {}", meal);
         meals.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
     public void delete(long id) {
         log.debug("Remove by id={}", id);
         meals.remove(id);
+    }
+
+    public static void initTestMeals() {
+        MealRepository mealRepository = MealRepositoryIntern.getInstance();
+
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 10, 0), "Завтрак", 500));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 13, 0), "Обед", 1000));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 20, 0), "Ужин", 500));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0), "Еда на граничное значение", 100));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 10, 0), "Завтрак", 1000));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед", 500));
+        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410));
     }
 
 }
