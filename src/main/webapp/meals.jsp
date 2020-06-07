@@ -13,8 +13,8 @@
 <c:set var="pattern" value="YYYY.MM.dd HH:mm:ss"/>
 <c:set var="formatter" value="${DateTimeFormatter.ofPattern(pattern)}"/>
 
-<table style="border: solid; width: 30%" >
-    <tr>
+<table style="border: solid; width: 60%">
+    <tr style="text-align: left">
         <th>Дата/время</th>
         <th>Описание</th>
         <th>Калории</th>
@@ -25,10 +25,14 @@
             <td><c:out value="${mealTo.dateTime.format(formatter)}"/></td>
             <td><c:out value="${mealTo.description}"/></td>
             <td><c:out value="${mealTo.calories}"/></td>
+            <td><a href="meals?action=edit&id=<c:out value="${mealTo.id}"/>">Изменить</a></td>
+            <td><a href="meals?action=delete&id=<c:out value="${mealTo.id}"/>">Удалить</a></td>
         </tr>
     </c:forEach>
 
 </table>
+
+<p><a href="meals?action=insert">Добавить</a></p>
 
 </body>
 </html>

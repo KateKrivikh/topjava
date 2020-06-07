@@ -1,24 +1,16 @@
 package ru.javawebinar.topjava.repository;
 
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.MealsUtil;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class MealRepository {
-    private static final Map<Long, Meal> meals = new ConcurrentHashMap<>();
-    private static Long counter = 0L;
+public interface MealRepository {
 
-    static {
-        List<Meal> list = MealsUtil.initMeals();
-        list.forEach(m -> meals.put(++counter, m));
-    }
+    List<Meal> getAll();
 
-    public static List<Meal> getAll() {
-        return new ArrayList<>(meals.values());
-    }
+    Meal getById(long id);
 
+    void save(Meal meal);
+
+    void delete(long id);
 }
