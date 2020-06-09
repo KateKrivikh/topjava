@@ -38,17 +38,23 @@ public class MealRepositoryIntern implements MealRepository {
 
     @Override
     public Meal save(Meal meal) {
+        Meal returnedMeal = null;
+
         long id = meal.getId();
         if (id == 0) {
             id = counter.incrementAndGet();
             meal = new Meal(id, meal.getDateTime(), meal.getDescription(), meal.getCalories());
-        } else if (!meals.containsKey(id)) {
-            log.warn("Save failed: id={} is not exist", id);
-            return null;
+            if (meals.putIfAbsent(id, meal) == null)
+                returnedMeal = meal;
+        } else {
+            returnedMeal = meals.replace(id, meal);
         }
-        log.debug("Save: {}", meal);
-        meals.put(meal.getId(), meal);
-        return meal;
+
+        if (returnedMeal == null)
+            log.warn("Save failed: id={}", id);
+        else
+            log.debug("Save: {}", returnedMeal);
+        return returnedMeal;
     }
 
     @Override

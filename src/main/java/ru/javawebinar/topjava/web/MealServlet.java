@@ -20,7 +20,7 @@ import java.util.List;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
-    private final MealRepository mealRepository = new MealRepositoryIntern();
+    private MealRepository mealRepository;
 
     public static final String JSP_MEAL_LIST = "/meals.jsp";
     public static final String JSP_MEAL = "/meal.jsp";
@@ -30,6 +30,12 @@ public class MealServlet extends HttpServlet {
     private static final int CALORIES_PER_DAY_FOR_EXCESS = 2000;
 
     private static final Logger log = getLogger(MealServlet.class);
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        mealRepository = new MealRepositoryIntern();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
