@@ -18,7 +18,7 @@ public class MealsUtil {
     private static final Logger log = getLogger(MealsUtil.class);
 
     public static void main(String[] args) {
-        MealRepository mealRepository = MealRepositoryIntern.getInstance();
+        MealRepository mealRepository = new MealRepositoryIntern();
         List<Meal> meals = mealRepository.getAll();
 
         List<MealTo> mealsTo = filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);

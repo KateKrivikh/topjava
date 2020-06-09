@@ -14,22 +14,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealRepositoryIntern implements MealRepository {
-    private static final MealRepositoryIntern instance = new MealRepositoryIntern();
 
-    private static final Map<Long, Meal> meals = new ConcurrentHashMap<>();
-    private static final AtomicLong counter = new AtomicLong(0);
+    private final Map<Long, Meal> meals = new ConcurrentHashMap<>();
+    private final AtomicLong counter = new AtomicLong(0);
 
     private static final Logger log = getLogger(MealRepositoryIntern.class);
 
-    static {
+    public MealRepositoryIntern() {
         initTestMeals();
-    }
-
-    private MealRepositoryIntern() {
-    }
-
-    public static MealRepositoryIntern getInstance() {
-        return instance;
     }
 
     @Override
@@ -50,6 +42,9 @@ public class MealRepositoryIntern implements MealRepository {
         if (id == 0) {
             id = counter.incrementAndGet();
             meal = new Meal(id, meal.getDateTime(), meal.getDescription(), meal.getCalories());
+        } else if (!meals.containsKey(id)) {
+            log.warn("Save failed: id={} is not exist", id);
+            return null;
         }
         log.debug("Save: {}", meal);
         meals.put(meal.getId(), meal);
@@ -62,16 +57,14 @@ public class MealRepositoryIntern implements MealRepository {
         meals.remove(id);
     }
 
-    public static void initTestMeals() {
-        MealRepository mealRepository = MealRepositoryIntern.getInstance();
-
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 10, 0), "Завтрак", 500));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 13, 0), "Обед", 1000));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 20, 0), "Ужин", 500));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0), "Еда на граничное значение", 100));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 10, 0), "Завтрак", 1000));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед", 500));
-        mealRepository.save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410));
+    public void initTestMeals() {
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 10, 0), "Завтрак", 500));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 13, 0), "Обед", 1000));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 30, 20, 0), "Ужин", 500));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0), "Еда на граничное значение", 100));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 10, 0), "Завтрак", 1000));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед", 500));
+        save(new Meal(0, LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410));
     }
 
 }

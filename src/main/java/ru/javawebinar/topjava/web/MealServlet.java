@@ -20,12 +20,12 @@ import java.util.List;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
-    private static final MealRepository mealRepository = MealRepositoryIntern.getInstance();
+    private final MealRepository mealRepository = new MealRepositoryIntern();
 
     public static final String JSP_MEAL_LIST = "/meals.jsp";
     public static final String JSP_MEAL = "/meal.jsp";
     public static final String REDIRECT_MEAL_LIST = "meals";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
     private static final int CALORIES_PER_DAY_FOR_EXCESS = 2000;
 
