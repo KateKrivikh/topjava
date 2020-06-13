@@ -14,6 +14,22 @@
         .excess {
             color: red;
         }
+
+        dl {
+            margin: 8px 0;
+            padding: 0;
+        }
+
+        dt {
+            display: inline-block;
+            margin-left: 8px;
+            width: 150px;
+        }
+
+        dd {
+            display: inline-block;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -21,6 +37,24 @@
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
+
+    <form action="meals" method="get">
+        <input type="hidden" name="action" value="filter">
+        <dl>
+            <dt>Date from (included):</dt>
+            <dd><input type="date" name="dateFrom" value="${requestScope.dateFrom}"/></dd>
+            <dt>Time from (included):</dt>
+            <dd><input type="time" name="timeFrom" value="${requestScope.timeFrom}"/></dd>
+        </dl>
+        <dl>
+            <dt>Date to (included):</dt>
+            <dd><input type="date" name="dateTo" value="${requestScope.dateTo}"/></dd>
+            <dt>Time to (excluded):</dt>
+            <dd><input type="time" name="timeTo" value="${requestScope.timeTo}"/></dd>
+        </dl>
+        <button type="submit">Filter</button>
+    </form>
+
     <a href="meals?action=create">Add Meal</a>
     <br><br>
     <table border="1" cellpadding="8" cellspacing="0">

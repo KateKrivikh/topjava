@@ -6,8 +6,19 @@
 <body>
 <h3>Проект <a href="https://github.com/JavaWebinar/topjava" target="_blank">Java Enterprise (Topjava)</a></h3>
 <hr>
+<select name="user" id="user">
+    <option value="1">1</option>
+    <option value="2">2</option>
+</select>
+
+<script type="text/javascript">
+    function makeHref (resource, user) {
+        window.location.href = resource + "?userId=" + user;
+    }
+</script>
+
 <ul>
-    <li><a href="users">Users</a></li>
+    <li><a href="#" onclick="makeHref('users', user.value)">Users</a></li>
     <li><a href="meals">Meals</a></li>
 </ul>
 </body>
