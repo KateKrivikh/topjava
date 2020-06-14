@@ -42,15 +42,15 @@
         <input type="hidden" name="action" value="filter">
         <dl>
             <dt>Date from (included):</dt>
-            <dd><input type="date" name="dateFrom" value="${requestScope.dateFrom}"/></dd>
+            <dd><input type="date" name="dateFrom" value="${param.dateFrom}"/></dd>
             <dt>Time from (included):</dt>
-            <dd><input type="time" name="timeFrom" value="${requestScope.timeFrom}"/></dd>
+            <dd><input type="time" name="timeFrom" value="${param.timeFrom}"/></dd>
         </dl>
         <dl>
             <dt>Date to (included):</dt>
-            <dd><input type="date" name="dateTo" value="${requestScope.dateTo}"/></dd>
+            <dd><input type="date" name="dateTo" value="${param.dateTo}"/></dd>
             <dt>Time to (excluded):</dt>
-            <dd><input type="time" name="timeTo" value="${requestScope.timeTo}"/></dd>
+            <dd><input type="time" name="timeTo" value="${param.timeTo}"/></dd>
         </dl>
         <button type="submit">Filter</button>
     </form>

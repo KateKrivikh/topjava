@@ -46,8 +46,7 @@ public class MealServlet extends HttpServlet {
         Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")),
-                SecurityUtil.authUserId());
+                Integer.parseInt(request.getParameter("calories")));
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
         if (meal.isNew())
@@ -71,7 +70,7 @@ public class MealServlet extends HttpServlet {
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
-                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000, SecurityUtil.authUserId()) :
+                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
                         mealRestController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
@@ -83,10 +82,6 @@ public class MealServlet extends HttpServlet {
                 LocalTime timeFrom = request.getParameter("timeFrom").isEmpty() ? null : LocalTime.parse(request.getParameter("timeFrom"));
                 LocalTime timeTo = request.getParameter("timeTo").isEmpty() ? null : LocalTime.parse(request.getParameter("timeTo"));
                 request.setAttribute("meals", mealRestController.getAll(dateFrom, timeFrom, dateTo, timeTo));
-                request.setAttribute("dateFrom", dateFrom);
-                request.setAttribute("dateTo", dateTo);
-                request.setAttribute("timeFrom", timeFrom);
-                request.setAttribute("timeTo", timeTo);
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
             case "all":
