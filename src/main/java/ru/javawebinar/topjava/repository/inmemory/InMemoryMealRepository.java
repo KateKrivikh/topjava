@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,7 +26,7 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(m -> save(m, SecurityUtil.authUserId()));
+        MealsUtil.MEALS.forEach(m -> save(m, 1));
     }
 
     @Override
@@ -36,16 +35,12 @@ public class InMemoryMealRepository implements MealRepository {
 
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-        } else if (repository.getOrDefault(userId, new ConcurrentHashMap<>()).get(meal.getId()) == null)
+        } else if (repository.getOrDefault(userId, new ConcurrentHashMap<>()).get(meal.getId()) == null) {
             return null;
+        }
 
-        ConcurrentHashMap<Integer, Meal> idMealForSaving = new ConcurrentHashMap<>();
-        idMealForSaving.put(meal.getId(), meal);
-
-        repository.merge(userId, idMealForSaving, (oldMap, newMap) -> {
-            oldMap.putAll(newMap);
-            return oldMap;
-        });
+        repository.putIfAbsent(userId, new ConcurrentHashMap<>());
+        repository.get(userId).put(meal.getId(), meal);
         return meal;
     }
 
