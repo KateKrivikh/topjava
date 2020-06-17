@@ -11,6 +11,7 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,27 +34,29 @@ public class InMemoryMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         log.info("save {}", meal);
 
+        Map<Integer, Meal> userMap = repository.getOrDefault(userId, new HashMap<>());
+
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-        } else if (repository.getOrDefault(userId, new ConcurrentHashMap<>()).get(meal.getId()) == null) {
+        } else if (userMap.get(meal.getId()) == null) {
             return null;
         }
 
-        repository.putIfAbsent(userId, new ConcurrentHashMap<>());
-        repository.get(userId).put(meal.getId(), meal);
+        userMap.put(meal.getId(), meal);
+        repository.put(userId, userMap);
         return meal;
     }
 
     @Override
     public boolean delete(int id, int userId) {
         log.info("delete {}", id);
-        return repository.getOrDefault(userId, new ConcurrentHashMap<>()).remove(id) != null;
+        return repository.getOrDefault(userId, new HashMap<>()).remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
         log.info("get {}", id);
-        return repository.getOrDefault(userId, new ConcurrentHashMap<>()).get(id);
+        return repository.getOrDefault(userId, new HashMap<>()).get(id);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class InMemoryMealRepository implements MealRepository {
 
 
     private List<Meal> getMeals(int userId, Predicate<Meal> filter) {
-        return repository.getOrDefault(userId, new ConcurrentHashMap<>()).values().stream()
+        return repository.getOrDefault(userId, new HashMap<>()).values().stream()
                 .filter(filter)
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
