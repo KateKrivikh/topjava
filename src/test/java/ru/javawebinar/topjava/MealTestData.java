@@ -42,7 +42,7 @@ public class MealTestData {
 
 
     public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualToComparingOnlyGivenFields(expected, "id", "dateTime", "description", "calories");
     }
 
     public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
@@ -50,6 +50,6 @@ public class MealTestData {
     }
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
-        assertThat(actual).usingDefaultElementComparator().isEqualTo(expected);
+        assertThat(actual).usingElementComparatorOnFields("id", "dateTime", "description", "calories").isEqualTo(expected);
     }
 }
