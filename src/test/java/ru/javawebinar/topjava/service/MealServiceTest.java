@@ -1,7 +1,12 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -12,8 +17,11 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertThrows;
+import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -25,6 +33,40 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+
+    private static final Logger log = getLogger(MealServiceTest.class);
+
+    private static final Map<String, Long> executionTimeOfMethods = new HashMap<>();
+
+    @Rule
+    public final TestName testName = new TestName();
+
+    @Rule
+    public final ExternalResource calculatingMethodExecutionTime = new ExternalResource() {
+        private long startTime;
+
+        @Override
+        protected void before() throws Throwable {
+            startTime = System.nanoTime();
+        }
+
+        @Override
+        protected void after() {
+            long endTime = System.nanoTime();
+            long executionTime = endTime - startTime;
+            log.debug("Method '{}': execution time = {}ns", testName.getMethodName(), executionTime);
+            executionTimeOfMethods.put(testName.getMethodName(), executionTime);
+        }
+    };
+
+    @AfterClass
+    public static void printExecutionTimeOfMethods() {
+        StringBuilder sb = new StringBuilder("Execution time of methods:\n");
+        for (Map.Entry<String, Long> entry : executionTimeOfMethods.entrySet()) {
+            sb.append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
+        }
+        log.info(sb.toString());
+    }
 
     @Autowired
     private MealService service;
