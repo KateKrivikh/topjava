@@ -1,29 +1,23 @@
 package ru.javawebinar.topjava.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NamedQueries({
-        @NamedQuery(name = Meal.GET_BY_ID, query = "SELECT m FROM Meal m WHERE m.id=:id and m.user.id=:userId"),
         @NamedQuery(name = Meal.GET_ALL_SORTED, query = "SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC"),
         @NamedQuery(name = Meal.GET_BETWEEN_HALF_OPEN, query = "SELECT m FROM Meal m WHERE m.user.id=:userId and m.dateTime >=:start and m.dateTime <:end ORDER BY m.dateTime DESC"),
         @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id and m.user.id=:userId"),
-        @NamedQuery(name = Meal.GET_USER, query = "SELECT m.user FROM Meal m WHERE m.id=:id and m.user.id=:userId"),
 })
 
 @Entity
 @Table(name = "meals", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "date_time"}, name = "meals_unique_user_datetime_idx")})
 public class Meal extends AbstractBaseEntity {
-    public static final String GET_BY_ID = "Meal.getById";
     public static final String GET_ALL_SORTED = "Meal.getAllSorted";
     public static final String GET_BETWEEN_HALF_OPEN = "Meal.getBetweenHalfOpen";
     public static final String DELETE = "Meal.delete";
-    public static final String GET_USER = "Meal.getUser";
 
     @Column(name = "date_time", nullable = false)
     @NotNull
@@ -31,14 +25,16 @@ public class Meal extends AbstractBaseEntity {
 
     @Column(name = "description", nullable = false)
     @NotBlank
+    @Size(min = 2, max = 120)
     private String description;
 
-    @Column(name = "calories", nullable = false)
-    @Min(1)
+    @Column(name = "calories", nullable = false, columnDefinition = "int default 1000")
+    @Min(10)
+    @Max(5000)
     private int calories;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional=false, cascade=CascadeType.ALL)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional=false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
     public Meal() {

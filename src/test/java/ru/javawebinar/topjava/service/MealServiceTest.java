@@ -3,8 +3,8 @@ package ru.javawebinar.topjava.service;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExternalResource;
-import org.junit.rules.TestName;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +12,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.javawebinar.topjava.PrintUtil;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertThrows;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -39,33 +40,20 @@ public class MealServiceTest {
     private static final Map<String, Long> executionTimeOfMethods = new HashMap<>();
 
     @Rule
-    public final TestName testName = new TestName();
-
-    @Rule
-    public final ExternalResource calculatingMethodExecutionTime = new ExternalResource() {
-        private long startTime;
-
+    public final Stopwatch stopwatch = new Stopwatch() {
         @Override
-        protected void before() throws Throwable {
-            startTime = System.nanoTime();
-        }
+        protected void finished(long nanos, Description description) {
+            String methodName = description.getMethodName();
+            long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(nanos);
 
-        @Override
-        protected void after() {
-            long endTime = System.nanoTime();
-            long executionTime = endTime - startTime;
-            log.debug("Method '{}': execution time = {}ns", testName.getMethodName(), executionTime);
-            executionTimeOfMethods.put(testName.getMethodName(), executionTime);
+            log.trace("Method '{}': execution time = {}ms", methodName, executionTimeMillis);
+            executionTimeOfMethods.put(methodName, executionTimeMillis);
         }
     };
 
     @AfterClass
     public static void printExecutionTimeOfMethods() {
-        StringBuilder sb = new StringBuilder("Execution time of methods:\n");
-        for (Map.Entry<String, Long> entry : executionTimeOfMethods.entrySet()) {
-            sb.append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-        }
-        log.info(sb.toString());
+        log.trace(PrintUtil.formatExecutionTimeOfMethods(executionTimeOfMethods));
     }
 
     @Autowired

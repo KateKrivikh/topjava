@@ -11,12 +11,25 @@
         </encoder>
     </appender>
 
-    <logger name="org.postgresql" level="debug"/>
-    <logger name="org.springframework.jdbc" level="info"/>
-    <logger name="ru.javawebinar.topjava" level="debug"/>
+    <appender name="consoleStatistics" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %class{50}.%M:%L - %cyan(%msg%n)</pattern>
+        </encoder>
+    </appender>
 
-    <root level="INFO">
+    <logger name="org.postgresql" level="debug">
         <appender-ref ref="console"/>
-    </root>
+    </logger>
+    <logger name="org.springframework.jdbc" level="info">
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="ru.javawebinar.topjava" level="debug" additivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="ru.javawebinar.topjava.service.MealServiceTest" additivity="false" level="trace">
+        <appender-ref ref="consoleStatistics"/>
+    </logger>
 
 </configuration>
