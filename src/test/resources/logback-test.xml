@@ -24,11 +24,11 @@
     <logger name="org.springframework.jdbc" level="info">
         <appender-ref ref="console"/>
     </logger>
-    <logger name="ru.javawebinar.topjava" level="debug" additivity="false">
+    <logger name="ru.javawebinar.topjava" level="debug">
         <appender-ref ref="console"/>
     </logger>
 
-    <logger name="ru.javawebinar.topjava.service.MealServiceTest" additivity="false" level="trace">
+    <logger name="consoleStatistics" level="debug">
         <appender-ref ref="consoleStatistics"/>
     </logger>
 

@@ -12,7 +12,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.javawebinar.topjava.PrintUtil;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -35,7 +34,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-    private static final Logger log = getLogger(MealServiceTest.class);
+    private static final Logger log = getLogger("consoleStatistics");
 
     private static final Map<String, Long> executionTimeOfMethods = new HashMap<>();
 
@@ -46,14 +45,32 @@ public class MealServiceTest {
             String methodName = description.getMethodName();
             long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(nanos);
 
-            log.trace("Method '{}': execution time = {}ms", methodName, executionTimeMillis);
+            log.info("Method '{}': execution time = {}ms", methodName, executionTimeMillis);
             executionTimeOfMethods.put(methodName, executionTimeMillis);
         }
     };
 
     @AfterClass
     public static void printExecutionTimeOfMethods() {
-        log.trace(PrintUtil.formatExecutionTimeOfMethods(executionTimeOfMethods));
+        int maxLengthMethodName = 50;
+        int maxLengthMillis = 10;
+
+        StringBuilder sb = new StringBuilder("Execution time of methods:\n");
+
+        String border = String.format("+%s+%s+\n",
+                String.join("", Collections.nCopies(maxLengthMethodName, "-")),
+                String.join("", Collections.nCopies(maxLengthMillis, "-")));
+
+        sb.append(border);
+        sb.append(String.format("|%-" + maxLengthMethodName +"s|%-" + maxLengthMillis + "s|\n", "Method name:", "Millis:"));
+        sb.append(border);
+
+        for (Map.Entry<String, Long> entry : executionTimeOfMethods.entrySet()) {
+            sb.append(String.format("|%-" + maxLengthMethodName +"s|%-" + maxLengthMillis + "d|\n", entry.getKey(), entry.getValue()));
+        }
+
+        sb.append(border);
+        log.info(sb.toString());
     }
 
     @Autowired
