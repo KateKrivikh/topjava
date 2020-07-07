@@ -19,7 +19,7 @@ public class SpringMain {
         // java 7 automatic resource management
         try (GenericXmlApplicationContext springContext = new GenericXmlApplicationContext()) {
             ConfigurableEnvironment env = springContext.getEnvironment();
-            env.setActiveProfiles(Profiles.getActiveDbProfile(), "jdbc");
+            env.setActiveProfiles(Profiles.getActiveDbProfile(), Profiles.JDBC);
             springContext.load("spring/spring-app.xml", "spring/spring-db.xml");
             springContext.refresh();
 
