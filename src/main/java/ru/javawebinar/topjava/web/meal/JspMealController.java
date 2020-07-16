@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 
@@ -16,18 +17,19 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @Controller
+@RequestMapping(value = "/meals")
 public class JspMealController extends AbstractMealController {
     public JspMealController(MealService service) {
         super(service);
     }
 
-    @GetMapping("/meals")
+    @GetMapping
     public String getMeals(Model model) {
         model.addAttribute("meals", getAll());
         return "meals";
     }
 
-    @GetMapping("/meals/filter")
+    @GetMapping("filter")
     public String getMealsBetween(HttpServletRequest request, Model model) {
         LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
         LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
@@ -38,27 +40,27 @@ public class JspMealController extends AbstractMealController {
         return "meals";
     }
 
-    @GetMapping("/meals/create")
+    @GetMapping("create")
     public String getMealNew(HttpServletRequest request) {
         request.setAttribute("meal", getNew());
         return "mealForm";
     }
 
-    @GetMapping("/meals/update")
+    @GetMapping("update")
     public String getMeal(HttpServletRequest request) {
         int id = getId(request);
         request.setAttribute("meal", get(id));
         return "mealForm";
     }
 
-    @GetMapping("/meals/delete")
+    @GetMapping("delete")
     public String deleteMeal(HttpServletRequest request) {
         int id = getId(request);
         delete(id);
         return "redirect:/meals";
     }
 
-    @PostMapping("/meals")
+    @PostMapping
     public String saveMeal(HttpServletRequest request) {
         Meal meal = new Meal(
                 LocalDateTime.parse(request.getParameter("dateTime")),
