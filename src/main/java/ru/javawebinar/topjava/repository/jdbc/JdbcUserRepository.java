@@ -1,6 +1,6 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
@@ -24,9 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Repository
 @Transactional(readOnly = true)
-public class JdbcUserRepository implements UserRepository {
+public abstract class JdbcUserRepository implements UserRepository {
 
     private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
 
@@ -38,7 +38,6 @@ public class JdbcUserRepository implements UserRepository {
 
     private final Validator validator;
 
-    @Autowired
     public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
@@ -97,7 +96,9 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public User get(int id) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users LEFT JOIN " +
-                "(SELECT user_id, string_agg(DISTINCT role, ',') as roles FROM user_roles GROUP BY user_id) as user_roles " +
+                "(SELECT user_id, " +
+                aggregateRoles() + " as roles " +
+                "FROM user_roles GROUP BY user_id) as user_roles " +
                 "ON users.id = user_roles.user_id " +
                 "WHERE id=?", ROW_MAPPER, id);
         return DataAccessUtils.singleResult(users);
@@ -106,7 +107,9 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public User getByEmail(String email) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users LEFT JOIN " +
-                "(SELECT user_id, string_agg(DISTINCT role, ',') as roles FROM user_roles GROUP BY user_id) as user_roles " +
+                "(SELECT user_id, " +
+                aggregateRoles() + " as roles " +
+                "FROM user_roles GROUP BY user_id) as user_roles " +
                 "ON users.id = user_roles.user_id " +
                 "WHERE email=?", ROW_MAPPER, email);
         return DataAccessUtils.singleResult(users);
@@ -115,8 +118,40 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public List<User> getAll() {
         return jdbcTemplate.query("SELECT * FROM users LEFT JOIN " +
-                "(SELECT user_id, string_agg(DISTINCT role, ',') as roles FROM user_roles GROUP BY user_id) as user_roles " +
+                "(SELECT user_id, " +
+                aggregateRoles() + " as roles " +
+                "FROM user_roles GROUP BY user_id) as user_roles " +
                 "ON users.id = user_roles.user_id " +
                 "ORDER BY name, email", ROW_MAPPER);
+    }
+
+    protected abstract String aggregateRoles();
+
+    @Repository
+    @Profile(Profiles.POSTGRES_DB)
+    public static class PostgresJdbcUserRepository extends JdbcUserRepository {
+
+        public PostgresJdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+            super(jdbcTemplate, namedParameterJdbcTemplate);
+        }
+
+        @Override
+        protected String aggregateRoles() {
+            return "STRING_AGG(DISTINCT role, ',')";
+        }
+    }
+
+    @Repository
+    @Profile(Profiles.HSQL_DB)
+    public static class HsqldbJdbcUserRepository extends JdbcUserRepository {
+
+        public HsqldbJdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+            super(jdbcTemplate, namedParameterJdbcTemplate);
+        }
+
+        @Override
+        protected String aggregateRoles() {
+            return "GROUP_CONCAT(DISTINCT role SEPARATOR ',')";
+        }
     }
 }
