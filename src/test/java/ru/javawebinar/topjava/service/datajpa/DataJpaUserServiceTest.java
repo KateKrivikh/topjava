@@ -8,6 +8,10 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.AbstractHibernateUserServiceTest;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import java.util.List;
+
+import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL1;
+import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL2;
 import static ru.javawebinar.topjava.Profiles.DATAJPA;
 import static ru.javawebinar.topjava.UserTestData.*;
 
@@ -15,9 +19,9 @@ import static ru.javawebinar.topjava.UserTestData.*;
 public class DataJpaUserServiceTest extends AbstractHibernateUserServiceTest {
     @Test
     public void getWithMeals() throws Exception {
-        User user = service.getWithMeals(USER_ID);
-        USER_MATCHER.assertMatch(user, USER);
-        MealTestData.MEAL_MATCHER.assertMatch(user.getMeals(), MealTestData.MEALS);
+        User user = service.getWithMeals(ADMIN_ID);
+        USER_MATCHER.assertMatch(user, ADMIN);
+        MealTestData.MEAL_MATCHER.assertMatch(user.getMeals(), List.of(ADMIN_MEAL2, ADMIN_MEAL1));
     }
 
     @Test
