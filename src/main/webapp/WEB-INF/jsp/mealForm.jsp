@@ -11,17 +11,11 @@
 <jsp:include page="fragments/bodyHeader.jsp"/>
 
     <h2>
-        <c:choose>
-            <c:when test="${param.id == null}">
-                <spring:message code="meal.addTitle"/>
-            </c:when>
-            <c:otherwise>
-                <spring:message code="meal.updateTitle"/>
-            </c:otherwise>
-        </c:choose>
+        <c:set var="title" scope="request" value="${param.id == null ? 'meal.addTitle' : 'meal.updateTitle'}"/>
+        <spring:message code="${title}"/>
     </h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
-    <form method="post" action="${pageContext.request.contextPath}/meals">
+    <form method="post" action="meals">
         <input type="hidden" name="id" value="${meal.id}">
         <dl>
             <dt><spring:message code="meal.date"/></dt>
