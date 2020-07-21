@@ -16,6 +16,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -49,8 +50,9 @@ public class JdbcMealRepository implements MealRepository {
     @Override
     @Transactional
     public Meal save(Meal meal, int userId) {
+//        Set<ConstraintViolation<Meal>> violations = validator.validate(meal, Default.class);
         Set<ConstraintViolation<Meal>> violations = doNotValidateUser(validator.validate(meal));
-        if (violations != null) {
+        if (violations != null && violations.size() > 0) {
             throw new ConstraintViolationException(violations);
         }
 
