@@ -100,6 +100,8 @@
                     <entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_SCRIPTS_DROP_TARGET}" value="${TOPJAVA_ROOT}/config/ddl/drop.ddl"/>
                     <entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_AUTO}" value="create"/>
 -->
+                    <entry key="javax.persistence.validation.group.pre-update" value="ru.javawebinar.topjava.util.UserChecks"/>
+                    <entry key="javax.persistence.validation.group.pre-persist" value="ru.javawebinar.topjava.util.UserChecks"/>
                 </map>
             </property>
 
@@ -114,28 +116,6 @@
               p:entityManagerFactory-ref="entityManagerFactory"/>
 
         <bean class="ru.javawebinar.topjava.repository.JpaUtil"/>
-
-<!--        variant 1-->
-
-<!--        <util:properties id="hp" location="classpath:hibernate/hibernate.properties"/>-->
-<!--        <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>-->
-<!--        <bean id="beanValidationEventListener" class="org.hibernate.cfg.beanvalidation.BeanValidationEventListener">-->
-<!--            <constructor-arg ref="validator"/>-->
-<!--            <constructor-arg ref="hp"/>-->
-<!--            <constructor-arg ref=""/>-->
-<!--        </bean>-->
-
-
-<!--        variant 2-->
-
-<!--        http://internetka.in.ua/hibernate-setup/-->
-<!--        https://discourse.hibernate.org/t/hibernateexception-access-to-dialectresolutioninfo-cannot-be-null-when-hibernate-dialect-not-set/2103/9-->
-<!--        https://stackoverflow.com/questions/7386910/how-to-configure-this-code-as-spring-bean-->
-<!--        https://stackoverrun.com/ru/q/2177383-->
-<!--        <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">-->
-<!--            <property name="dataSource" ref="dataSource"/>-->
-<!--            <property name="configLocation" value="classpath:hibernate/hibernate.cfg.xml"/>-->
-<!--        </bean>-->
     </beans>
 
     <beans profile="jpa">
