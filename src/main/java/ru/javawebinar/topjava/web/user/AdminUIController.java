@@ -9,8 +9,10 @@ import ru.javawebinar.topjava.model.User;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/users")
+@RequestMapping(AdminUIController.REST_URL)
 public class AdminUIController extends AbstractUserController {
+
+    public static final String REST_URL = "/admin/users";
 
     @Override
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -36,5 +38,11 @@ public class AdminUIController extends AbstractUserController {
         if (user.isNew()) {
             super.create(user);
         }
+    }
+
+    @PostMapping("/enable/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enable(@PathVariable int id, @RequestParam boolean enabled) {
+        super.enable(id, enabled);
     }
 }

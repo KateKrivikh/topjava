@@ -1,7 +1,9 @@
+var userUrl = "admin/users/";
+
 // $(document).ready(function () {
 $(function () {
     makeEditable({
-            ajaxUrl: "admin/users/",
+            ajaxUrl: userUrl,
             datatableApi: $("#datatable").DataTable({
                 "paging": false,
                 "info": true,
@@ -36,7 +38,23 @@ $(function () {
                         "asc"
                     ]
                 ]
-            })
+            }),
+            update: updateTable
         }
     );
 });
+
+function enableUser(checkbox) {
+    let id = checkbox.parent().parent().attr("data-id");
+    let enabled = checkbox.is(":checked");
+    $.ajax({
+        type: "POST",
+        url: userUrl + "enable/" + id,
+        data: "enabled=" + enabled
+    }).done(function () {
+        checkbox.closest("tr").attr("data-userEnabled", enabled);
+        successNoty(enabled ? "User is enabled" : "User is disabled");
+    }).fail(function () {
+        checkbox.prop("checked", !enabled);
+    });
+}
