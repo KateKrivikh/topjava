@@ -49,7 +49,7 @@ function enableUser(checkbox) {
     let enabled = checkbox.is(":checked");
     $.ajax({
         type: "POST",
-        url: userUrl + "enable/" + id,
+        url: userUrl + id,
         data: "enabled=" + enabled
     }).done(function () {
         checkbox.closest("tr").attr("data-userEnabled", enabled);

@@ -65,7 +65,7 @@ class AdminUIControllerTest extends AbstractControllerTest {
     @Test
     void enable() throws Exception {
         boolean expected = false;
-        perform(post(REST_URL + "enable/" + USER_ID)
+        perform(post(REST_URL + USER_ID)
                 .param("enabled", String.valueOf(expected)))
                 .andDo(print())
                 .andExpect(status().isNoContent());

@@ -12,7 +12,9 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,7 +91,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getWithMeals() throws Exception {
-        ResultActions action = perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + ADMIN_ID))
+        ResultActions action = perform(MockMvcRequestBuilders.get(REST_URL + ADMIN_ID + "/with-meals"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -99,4 +101,14 @@ class AdminRestControllerTest extends AbstractControllerTest {
         MEAL_MATCHER.assertMatch(withMeals.getMeals(), ADMIN_MEAL2, ADMIN_MEAL1);
     }
 
+    @Test
+    void enable() throws Exception {
+        boolean expected = false;
+        perform(post(REST_URL + USER_ID)
+                .param("enabled", String.valueOf(expected)))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+        User user = userService.get(USER_ID);
+        assertThat(user.isEnabled()).isEqualTo(expected);
+    }
 }
