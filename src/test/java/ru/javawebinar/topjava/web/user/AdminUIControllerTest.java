@@ -57,10 +57,11 @@ class AdminUIControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        Integer newId = userService.getByEmail(newUser.getEmail()).getId();
+        User savedUser = userService.getByEmail(newUser.getEmail());
+        Integer newId = savedUser.getId();
 
         newUser.setId(newId);
-        USER_MATCHER.assertMatch(userService.get(newId), newUser);
+        USER_MATCHER.assertMatch(savedUser, newUser);
     }
 
     @Test
