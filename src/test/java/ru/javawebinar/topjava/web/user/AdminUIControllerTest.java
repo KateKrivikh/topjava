@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL_ID;
 import static ru.javawebinar.topjava.UserTestData.*;
 
 class AdminUIControllerTest extends AbstractControllerTest {
@@ -58,8 +57,10 @@ class AdminUIControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        newUser.setId(ADMIN_MEAL_ID + 2);
-        USER_MATCHER.assertMatch(userService.get(ADMIN_MEAL_ID + 2), newUser);
+        Integer newId = userService.getByEmail(newUser.getEmail()).getId();
+
+        newUser.setId(newId);
+        USER_MATCHER.assertMatch(userService.get(newId), newUser);
     }
 
     @Test
