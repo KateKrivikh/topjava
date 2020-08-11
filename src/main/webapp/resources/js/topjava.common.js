@@ -44,10 +44,17 @@ function updateTableByData(data) {
 }
 
 function save() {
+    let data = form.serialize();
+    let index = data.indexOf("dateTime=");
+    if (index > 0) {
+        let dateTimeParam = data.substring(index, 29 + index);
+        let newDateTimeParam = dateTimeParam.replace("%20", "T") + "%3A00";
+        data = data.replace(dateTimeParam, newDateTimeParam);
+    }
     $.ajax({
         type: "POST",
         url: context.ajaxUrl,
-        data: form.serialize()
+        data: data
     }).done(function () {
         $("#editRow").modal("hide");
         context.updateTable();
