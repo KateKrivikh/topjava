@@ -66,9 +66,7 @@ $(function () {
                 $(row).attr("data-mealExcess", data.excess);
             }
         }),
-        updateTable: function () {
-            $.get(mealAjaxUrl, updateFilteredTable);
-        }
+        updateTable: updateFilteredTable
     });
 
     $.datetimepicker.setLocale(localeCode);
