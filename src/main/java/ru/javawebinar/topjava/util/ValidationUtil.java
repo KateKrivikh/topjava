@@ -1,16 +1,20 @@
 package ru.javawebinar.topjava.util;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.BindingResult;
 import ru.javawebinar.topjava.HasId;
 import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.validation.*;
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ValidationUtil {
+    public static final String USER_DUPLICATE_EMAIL_MESSAGE = "User with this email already exists";
+
     private static final Validator validator;
 
     static {
@@ -77,11 +81,23 @@ public class ValidationUtil {
         return result;
     }
 
-    public static ResponseEntity<String> getErrorResponse(BindingResult result) {
-        return ResponseEntity.unprocessableEntity().body(
-                result.getFieldErrors().stream()
-                        .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()))
-                        .collect(Collectors.joining("<br>"))
-        );
+    public static String getErrorResponseForHtml(BindingResult result) {
+        return getErrorResponse(result).collect(Collectors.joining("<br>"));
+    }
+
+    public static String getErrorResponseForRest(BindingResult result) {
+        return getErrorResponse(result).collect(Collectors.joining("\n"));
+    }
+
+    private static Stream<String> getErrorResponse(BindingResult result) {
+        return result.getFieldErrors().stream()
+                .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()));
+    }
+
+    public static Exception extractExceptionEmailDuplicationIfPossible(DataIntegrityViolationException e) {
+        Throwable rootCause = e.getRootCause();
+        if (rootCause instanceof SQLException && "23505".equals(((SQLException) rootCause).getSQLState()))
+            return new IllegalRequestDataException(USER_DUPLICATE_EMAIL_MESSAGE);
+        return e;
     }
 }

@@ -2,24 +2,28 @@ package ru.javawebinar.topjava.web.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
+import ru.javawebinar.topjava.util.ValidationUtil;
+import ru.javawebinar.topjava.util.exception.ErrorInfo;
+import ru.javawebinar.topjava.util.exception.ErrorType;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
-import ru.javawebinar.topjava.web.json.JsonUtil;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.util.ValidationUtil.USER_DUPLICATE_EMAIL_MESSAGE;
 
 class AdminRestControllerTest extends AbstractControllerTest {
 
@@ -93,10 +97,40 @@ class AdminRestControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(ADMIN))
-                .content(JsonUtil.writeValue(updated)))
+                .content(UserTestData.jsonWithPassword(updated, updated.getPassword())))
                 .andExpect(status().isNoContent());
 
         USER_MATCHER.assertMatch(userService.get(USER_ID), updated);
+    }
+
+    @Test
+    void updateNotValid() throws Exception {
+        User updated = getUpdated();
+        updated.setEmail(null);
+        ResultActions action = perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(updated, updated.getPassword())))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        ErrorInfo error = readFromJson(action, ErrorInfo.class);
+        assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
+        assertThat(error.getUrl()).endsWith(REST_URL + USER_ID);
+        assertThat(error.getDetail()).isEqualTo("[email] must not be blank");
+    }
+
+    @Test
+    void updateDuplicateEmail() throws Exception {
+        User updated = getUpdated();
+        updated.setEmail(ADMIN.getEmail());
+        perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(updated, updated.getPassword())));
+
+        DataIntegrityViolationException e = assertThrows(DataIntegrityViolationException.class, () -> userService.getAll());
+        Exception modified = ValidationUtil.extractExceptionEmailDuplicationIfPossible(e);
+        assertThat(modified.getMessage()).isEqualTo(USER_DUPLICATE_EMAIL_MESSAGE);
     }
 
     @Test
@@ -113,6 +147,36 @@ class AdminRestControllerTest extends AbstractControllerTest {
         newUser.setId(newId);
         USER_MATCHER.assertMatch(created, newUser);
         USER_MATCHER.assertMatch(userService.get(newId), newUser);
+    }
+
+    @Test
+    void createNotValid() throws Exception {
+        User newUser = getNew();
+        newUser.setEmail(null);
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(newUser, newUser.getPassword())))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        ErrorInfo error = readFromJson(action, ErrorInfo.class);
+        assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
+        assertThat(error.getUrl()).endsWith(REST_URL);
+        assertThat(error.getDetail()).isEqualTo("[email] must not be blank");
+    }
+
+    @Test
+    void createDuplicateEmail() throws Exception {
+        User newUser = getNew();
+        newUser.setEmail(ADMIN.getEmail());
+        perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(newUser, newUser.getPassword())));
+
+        DataIntegrityViolationException e = assertThrows(DataIntegrityViolationException.class, () -> userService.getAll());
+        Exception modified = ValidationUtil.extractExceptionEmailDuplicationIfPossible(e);
+        assertThat(modified.getMessage()).isEqualTo(USER_DUPLICATE_EMAIL_MESSAGE);
     }
 
     @Test
