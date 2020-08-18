@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -28,6 +30,7 @@ import static ru.javawebinar.topjava.UserTestData.USER;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.util.MealsUtil.createTo;
 import static ru.javawebinar.topjava.util.MealsUtil.getTos;
+import static ru.javawebinar.topjava.util.ValidationUtil.MEAL_DUPLICATE_DATETIME_MESSAGE;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -102,6 +105,22 @@ class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void updateDuplicateDateTime() throws Exception {
+        Meal updated = MealTestData.getUpdated();
+        updated.setDateTime(MEAL2.getDateTime());
+        ResultActions action = perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(updated))
+                .with(userHttpBasic(USER)))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        ErrorInfo error = readFromJson(action, ErrorInfo.class);
+        assertEquals(error.getType(), ErrorType.DATA_ERROR);
+        assertThat(error.getUrl()).endsWith(REST_URL + MEAL1_ID);
+        assertThat(error.getDetail()).isEqualTo(MEAL_DUPLICATE_DATETIME_MESSAGE);
+    }
+
+    @Test
     void createWithLocation() throws Exception {
         Meal newMeal = MealTestData.getNew();
         ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
@@ -130,6 +149,23 @@ class MealRestControllerTest extends AbstractControllerTest {
         assertEquals(error.getType(), ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
         assertThat(error.getDetail()).isEqualTo("[description] must not be blank");
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void createDuplicateDateTime() throws Exception {
+        Meal newMeal = MealTestData.getNew();
+        newMeal.setDateTime(MEAL2.getDateTime());
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(newMeal))
+                .with(userHttpBasic(USER)))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        ErrorInfo error = readFromJson(action, ErrorInfo.class);
+        assertEquals(error.getType(), ErrorType.DATA_ERROR);
+        assertThat(error.getUrl()).endsWith(REST_URL);
+        assertThat(error.getDetail()).isEqualTo(MEAL_DUPLICATE_DATETIME_MESSAGE);
     }
 
     @Test

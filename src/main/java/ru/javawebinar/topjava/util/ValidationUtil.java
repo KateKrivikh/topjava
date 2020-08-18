@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public class ValidationUtil {
     public static final String USER_DUPLICATE_EMAIL_MESSAGE = "User with this email already exists";
+    public static final String MEAL_DUPLICATE_DATETIME_MESSAGE = "Meal with this date and time already exists";
 
     private static final Validator validator;
 
@@ -97,7 +98,10 @@ public class ValidationUtil {
     public static Exception extractExceptionEmailDuplicationIfPossible(DataIntegrityViolationException e) {
         Throwable rootCause = e.getRootCause();
         if (rootCause instanceof SQLException && "23505".equals(((SQLException) rootCause).getSQLState()))
-            return new IllegalRequestDataException(USER_DUPLICATE_EMAIL_MESSAGE);
+            if (rootCause.getMessage().contains("users_unique_email_idx"))
+                return new IllegalRequestDataException(USER_DUPLICATE_EMAIL_MESSAGE);
+            else if (rootCause.getMessage().contains("meals_unique_user_datetime_idx"))
+                return new IllegalRequestDataException(MEAL_DUPLICATE_DATETIME_MESSAGE);
         return e;
     }
 }
