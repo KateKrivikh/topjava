@@ -83,7 +83,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + "/register");
-        assertThat(error.getDetail()).isEqualTo("[password] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[password] must not be blank\"]");
     }
 
     @Test
@@ -126,7 +126,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo("[password] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[password] must not be blank\"]");
     }
 
     @Test

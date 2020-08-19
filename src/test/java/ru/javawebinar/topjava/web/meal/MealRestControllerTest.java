@@ -101,7 +101,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + MEAL1_ID);
-        assertThat(error.getDetail()).isEqualTo("[description] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[description] must not be blank\"]");
     }
 
     @Test
@@ -148,7 +148,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo("[description] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[description] must not be blank\"]");
     }
 
     @Test

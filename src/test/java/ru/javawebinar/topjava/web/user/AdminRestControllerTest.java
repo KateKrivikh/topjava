@@ -117,7 +117,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + USER_ID);
-        assertThat(error.getDetail()).isEqualTo("[email] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[email] must not be blank\"]");
     }
 
     @Test
@@ -166,7 +166,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo("[email] must not be blank");
+        assertThat(error.getDetail()).isEqualTo("[\"[email] must not be blank\"]");
     }
 
     @Test
