@@ -2,6 +2,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <nav class="navbar navbar-dark bg-dark py-0 navbar-expand-md">
     <div class="container">
@@ -35,8 +36,8 @@
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle nav-link my-1 ml-2" data-toggle="dropdown" aria-expanded="false">${pageContext.response.locale}</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" href=".?locale=en">English</a>
-                    <a class="dropdown-item" href=".?locale=ru">Русский</a>
+                    <a class="dropdown-item" href="${pageContext.request.contextPath}${fn:substring(pageContext.request.requestURI, fn:length(pageContext.request.contextPath) + 12, fn:length(pageContext.request.requestURI) - 4)}?locale=en">English</a>
+                    <a class="dropdown-item" href="${pageContext.request.contextPath}${fn:substring(pageContext.request.requestURI, fn:length(pageContext.request.contextPath) + 12, fn:length(pageContext.request.requestURI) - 4)}?locale=ru">Русский</a>
                 </div>
             </li>
         </ul>
