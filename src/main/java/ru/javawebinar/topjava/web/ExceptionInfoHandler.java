@@ -38,7 +38,7 @@ public class ExceptionInfoHandler {
     @ResponseStatus(value = HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
-        Exception modified = ValidationUtil.extractExceptionEmailDuplicationIfPossible(e);
+        Exception modified = ValidationUtil.transformExceptionIfUniqueKeyDuplication(e);
         return logAndGetErrorInfo(req, modified, true, DATA_ERROR);
     }
 

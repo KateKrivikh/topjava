@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ModelAndView conflict(HttpServletRequest req, DataIntegrityViolationException e) throws Exception {
         log.error("Exception at request " + req.getRequestURL(), e);
-        Throwable modified = ValidationUtil.extractExceptionEmailDuplicationIfPossible(e);
+        Throwable modified = ValidationUtil.transformExceptionIfUniqueKeyDuplication(e);
 
         return createExceptionView(modified, HttpStatus.CONFLICT);
     }

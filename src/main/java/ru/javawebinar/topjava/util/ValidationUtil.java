@@ -87,7 +87,7 @@ public class ValidationUtil {
     }
 
     public static String getErrorResponseForRest(BindingResult result) {
-        return getErrorResponse(result).collect(Collectors.joining("\n"));
+        return getErrorResponse(result).collect(Collectors.joining("\",\"", "[\"", "\"]"));
     }
 
     private static Stream<String> getErrorResponse(BindingResult result) {
@@ -95,7 +95,7 @@ public class ValidationUtil {
                 .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()));
     }
 
-    public static Exception extractExceptionEmailDuplicationIfPossible(DataIntegrityViolationException e) {
+    public static Exception transformExceptionIfUniqueKeyDuplication(DataIntegrityViolationException e) {
         Throwable rootCause = e.getRootCause();
         if (rootCause instanceof SQLException && "23505".equals(((SQLException) rootCause).getSQLState()))
             if (rootCause.getMessage().contains("users_unique_email_idx"))
