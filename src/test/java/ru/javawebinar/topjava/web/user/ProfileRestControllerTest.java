@@ -16,6 +16,8 @@ import ru.javawebinar.topjava.util.exception.ErrorType;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -83,7 +85,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + "/register");
-        assertThat(error.getDetail()).isEqualTo("[\"[password] must not be blank\"]");
+        assertThat(error.getDetails()).isEqualTo(List.of("[password] must not be blank"));
     }
 
     @Test
@@ -99,7 +101,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.DATA_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + "/register");
-        assertThat(error.getDetail()).isEqualTo(USER_DUPLICATE_EMAIL_MESSAGE);
+        assertThat(error.getDetails()).isEqualTo(List.of(USER_DUPLICATE_EMAIL_MESSAGE));
     }
 
     @Test
@@ -126,7 +128,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo("[\"[password] must not be blank\"]");
+        assertThat(error.getDetails()).isEqualTo(List.of("[password] must not be blank"));
     }
 
     @Test
@@ -142,7 +144,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertThat(error.getType()).isEqualTo(ErrorType.DATA_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo(USER_DUPLICATE_EMAIL_MESSAGE);
+        assertThat(error.getDetails()).isEqualTo(List.of(USER_DUPLICATE_EMAIL_MESSAGE));
     }
 
     @Test

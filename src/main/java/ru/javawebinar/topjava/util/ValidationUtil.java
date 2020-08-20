@@ -8,9 +8,9 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.validation.*;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ValidationUtil {
     public static final String USER_DUPLICATE_EMAIL_MESSAGE = "user.duplicatedKey";
@@ -82,17 +82,10 @@ public class ValidationUtil {
         return result;
     }
 
-    public static String getErrorResponseForHtml(BindingResult result) {
-        return getErrorResponse(result).collect(Collectors.joining("<br>"));
-    }
-
-    public static String getErrorResponseForRest(BindingResult result) {
-        return getErrorResponse(result).collect(Collectors.joining("\",\"", "[\"", "\"]"));
-    }
-
-    private static Stream<String> getErrorResponse(BindingResult result) {
+    public static List<String> getErrorResponse(BindingResult result) {
         return result.getFieldErrors().stream()
-                .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()));
+                .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()))
+                .collect(Collectors.toList());
     }
 
     public static Exception transformExceptionIfUniqueKeyDuplication(DataIntegrityViolationException e) {

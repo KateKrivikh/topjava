@@ -1,9 +1,12 @@
 package ru.javawebinar.topjava.util.exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ErrorInfo {
     private String url;
     private ErrorType type;
-    private String detail;
+    private List<String> details;
 
     public ErrorInfo() {
     }
@@ -11,7 +14,14 @@ public class ErrorInfo {
     public ErrorInfo(CharSequence url, ErrorType type, String detail) {
         this.url = url.toString();
         this.type = type;
-        this.detail = detail;
+        this.details = new ArrayList<>();
+        this.details.add(detail);
+    }
+
+    public ErrorInfo(CharSequence url, ErrorType type, List<String> details) {
+        this.url = url.toString();
+        this.type = type;
+        this.details = details;
     }
 
     public String getUrl() {
@@ -30,11 +40,11 @@ public class ErrorInfo {
         this.type = type;
     }
 
-    public String getDetail() {
-        return detail;
+    public List<String> getDetails() {
+        return details;
     }
 
-    public void setDetail(String detail) {
-        this.detail = detail;
+    public void setDetails(List<String> details) {
+        this.details = details;
     }
 }

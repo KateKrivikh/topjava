@@ -96,12 +96,20 @@ function successNoty(key) {
 function failNoty(jqXHR) {
     closeNoty();
     var errorInfo = JSON.parse(jqXHR.responseText);
-    let detail = i18n[errorInfo.detail];
-    if (!detail) {
-        detail = errorInfo.detail;
+    let details = "";
+    for (let i in errorInfo.details) {
+        let detail = errorInfo.details[i];
+        if (details !== "") {
+            details += "<br>";
+        }
+        if (i18n[detail]) {
+            details += i18n[detail]
+        } else {
+            details += detail;
+        }
     }
     failedNote = new Noty({
-        text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;" + i18n["common.errorStatus"] + ": " + jqXHR.status + "<br>" + errorInfo.type + "<br>" + detail,
+        text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;" + i18n["common.errorStatus"] + ": " + jqXHR.status + "<br>" + errorInfo.type + "<br>" + details,
         type: "error",
         layout: "bottomRight"
     }).show();

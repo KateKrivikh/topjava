@@ -17,6 +17,8 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -101,7 +103,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + MEAL1_ID);
-        assertThat(error.getDetail()).isEqualTo("[\"[description] must not be blank\"]");
+        assertThat(error.getDetails()).isEqualTo(List.of("[description] must not be blank"));
     }
 
     @Test
@@ -117,7 +119,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.DATA_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL + MEAL1_ID);
-        assertThat(error.getDetail()).isEqualTo(MEAL_DUPLICATE_DATETIME_MESSAGE);
+        assertThat(error.getDetails()).isEqualTo(List.of(MEAL_DUPLICATE_DATETIME_MESSAGE));
     }
 
     @Test
@@ -148,7 +150,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.VALIDATION_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo("[\"[description] must not be blank\"]");
+        assertThat(error.getDetails()).isEqualTo(List.of("[description] must not be blank"));
     }
 
     @Test
@@ -165,7 +167,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         ErrorInfo error = readFromJson(action, ErrorInfo.class);
         assertEquals(error.getType(), ErrorType.DATA_ERROR);
         assertThat(error.getUrl()).endsWith(REST_URL);
-        assertThat(error.getDetail()).isEqualTo(MEAL_DUPLICATE_DATETIME_MESSAGE);
+        assertThat(error.getDetails()).isEqualTo(List.of(MEAL_DUPLICATE_DATETIME_MESSAGE));
     }
 
     @Test
