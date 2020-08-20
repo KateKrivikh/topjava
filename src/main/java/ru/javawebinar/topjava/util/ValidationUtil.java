@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValidationUtil {
-    public static final String USER_DUPLICATE_EMAIL_MESSAGE = "user.duplicatedEmail";
-    public static final String MEAL_DUPLICATE_DATETIME_MESSAGE = "meal.duplicatedDateTime";
+    public static final String USER_DUPLICATE_EMAIL_MESSAGE = "user.duplicatedKey";
+    public static final String MEAL_DUPLICATE_DATETIME_MESSAGE = "meal.duplicatedKey";
 
     private static final Validator validator;
 
